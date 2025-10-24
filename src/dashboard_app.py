@@ -8,6 +8,50 @@ from data_cleaner import load_and_clean
 from feature_engineer import extract_metadata_features
 from threat_scoring import compute_metadata_score, compute_threat_score, label_risk
 
+st.markdown(
+    """
+    <style>
+    /* Global background */
+    [data-testid="stAppViewContainer"] {
+        background: linear-gradient(180deg, #ffffff 0%, #f9fafb 100%);
+        color: #1e1e1e;
+        font-family: "Inter", sans-serif;
+    }
+
+    /* Sidebar styling */
+    [data-testid="stSidebar"] {
+        background-color: #f3f4f6;
+    }
+
+    /* Title and headings */
+    h1, h2, h3 {
+        color: #0b3954;
+        font-weight: 700;
+    }
+
+    /* Data table */
+    .stDataFrame table {
+        border-radius: 10px;
+        border: 1px solid #e5e7eb;
+    }
+
+    /* Slider */
+    .stSlider {
+        background: #ffffff;
+        border-radius: 10px;
+    }
+
+    /* Chart area */
+    .plotly {
+        background-color: #ffffff !important;
+        border-radius: 8px;
+        padding: 10px;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+
 st.set_page_config(page_title="AI Email & Chat Forensics", layout="wide")
 st.title("🔍 AI-Assisted Email & Chat Log Forensics")
 
