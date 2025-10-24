@@ -1,0 +1,13 @@
+pandas
+numpy
+scikit-learn
+nltk
+spacy
+transformers
+torch
+plotly
+streamlit
+fpdf
+reportlab
+tldextract
+python-whois
