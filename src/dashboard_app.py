@@ -7,117 +7,138 @@ import os
 import sys
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-
 # Internal modules
 from src.universal_parser import parse_file
 from data_cleaner import load_and_clean
 from feature_engineer import extract_metadata_features
 from threat_scoring import compute_metadata_score, compute_threat_score, label_risk
 
+
 # ----------------------------------------------------
 # Page Setup & Styling
 # ----------------------------------------------------
 st.set_page_config(page_title="AI Email & Chat Forensics", layout="wide")
 
-# Custom CSS theme — modern, forensic look
 st.markdown("""
 <style>
-/* ---------- Global Layout ---------- */
+/* Global App Background */
 [data-testid="stAppViewContainer"] {
-    background: linear-gradient(180deg, #0a192f 0%, #112240 100%);
-    color: #e6f1ff;
+    background: radial-gradient(circle at top left, #071E3D 0%, #0B2A59 60%, #081229 100%);
+    color: #e2e8f0;
     font-family: 'Inter', sans-serif;
-    padding: 1rem 2rem;
+}
+
+/* Remove top white padding */
+[data-testid="stHeader"] {
+    background: transparent;
+    height: 0rem;
 }
 
 /* Sidebar */
 [data-testid="stSidebar"] {
-    background: #09192d;
-    border-right: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-/* Main Card Container */
-.main-card {
-    background: rgba(255,255,255,0.05);
-    border: 1px solid rgba(255,255,255,0.15);
-    border-radius: 16px;
-    padding: 25px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+    background: #0c2340;
+    color: #e2e8f0;
 }
 
 /* Headings */
 h1, h2, h3 {
-    color: #64ffda;
+    color: #A7C7E7;
     font-weight: 700;
 }
-h1 {
-    font-size: 2.4rem;
-    text-shadow: 0 0 10px rgba(100,255,218,0.2);
-}
-h2 {
-    border-left: 4px solid #64ffda;
-    padding-left: 10px;
+
+/* Subtle glowing section titles */
+h2::after, h3::after {
+    content: "";
+    display: block;
+    height: 2px;
+    width: 60px;
+    margin-top: 6px;
+    background: linear-gradient(90deg, #00b4d8, #0077b6);
 }
 
-/* Tables */
-.stDataFrame table {
+/* Upload box & buttons */
+button[kind="primary"], .stButton>button {
+    background: linear-gradient(90deg, #0077b6, #00b4d8);
+    color: white !important;
     border-radius: 8px;
-    border: 1px solid rgba(255,255,255,0.15);
-    background-color: rgba(255,255,255,0.04);
-    color: #e6f1ff;
+    border: none;
+    font-weight: 600;
+}
+button:hover {
+    background: linear-gradient(90deg, #00b4d8, #0096c7);
 }
 
-/* Sliders */
-.stSlider {
-    background: rgba(255,255,255,0.05);
-    border-radius: 10px;
-    border: 1px solid rgba(255,255,255,0.1);
-}
-
-/* Plotly area */
-.plotly {
-    background-color: rgba(255,255,255,0.05) !important;
+/* File uploader visibility */
+[data-testid="stFileUploader"] {
+    background: rgba(255, 255, 255, 0.08);
     border-radius: 12px;
-    padding: 10px;
+    padding: 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
-/* Buttons */
-button[kind="primary"] {
-    background-color: #64ffda !important;
-    color: #0a192f !important;
-    border: none !important;
-    font-weight: 700 !important;
-    border-radius: 8px !important;
-    transition: all 0.3s ease;
+/* DataFrame styling */
+.stDataFrame {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    padding: 1rem;
 }
-button[kind="primary"]:hover {
-    background-color: #5de0c0 !important;
-    transform: translateY(-1px);
+.stDataFrame table {
+    color: #e2e8f0 !important;
 }
 
-/* Info / Warning Boxes */
-[data-baseweb="toast"] {
-    border: 1px solid rgba(100,255,218,0.3);
+/* Info / success boxes */
+.stAlert {
+    background-color: rgba(0, 119, 182, 0.2);
+    border: 1px solid #00b4d8;
     border-radius: 10px;
+    color: #e2e8f0;
+}
+
+/* Download button */
+.stDownloadButton>button {
+    background: linear-gradient(90deg, #00b4d8, #0096c7);
+    color: white !important;
+    border-radius: 8px;
+    font-weight: 600;
+}
+.stDownloadButton>button:hover {
+    background: linear-gradient(90deg, #48cae4, #00b4d8);
+}
+
+/* Plot background */
+.plotly {
+    background: rgba(255, 255, 255, 0.08) !important;
+    border-radius: 12px;
+    padding: 1rem;
+}
+
+/* Make horizontal rule subtle and glowing */
+hr {
+    border: none;
+    height: 1px;
+    background: linear-gradient(90deg, #0077b6, #00b4d8, transparent);
+    margin: 20px 0;
 }
 </style>
 """, unsafe_allow_html=True)
 
+
 # ----------------------------------------------------
 # Header
 # ----------------------------------------------------
-st.markdown('<div class="main-card">', unsafe_allow_html=True)
 st.title("🔍 AI-Assisted Email & Chat Log Forensics")
 st.markdown("Analyze digital communications using NLP & metadata correlation to flag potentially risky or malicious behavior.")
-st.write("✅ Running latest version — supports JSON, MBOX, EML, MSG, and CSV.")
-st.markdown('</div>', unsafe_allow_html=True)
+
+# Status line
+st.markdown("<div style='color:#9BE2FF;font-size:16px;font-weight:600;'>🟢 System ready — multi-format ingest active (CSV • JSON • MBOX • EML • MSG)</div>", unsafe_allow_html=True)
 
 # ----------------------------------------------------
 # File Upload Section
 # ----------------------------------------------------
-st.markdown('<div class="main-card">', unsafe_allow_html=True)
+st.markdown("<h3 style='color:#A7C7E7; font-weight:700; margin-top:10px;'>📂 Upload your email or chat data</h3>", unsafe_allow_html=True)
+
 uploaded = st.file_uploader(
-    "📂 Upload your email/chat data file (Supported: CSV, MBOX, EML, MSG, JSON)",
+    "",
     type=["csv", "mbox", "eml", "msg", "json"]
 )
 
@@ -128,6 +149,7 @@ if uploaded is not None:
         with st.spinner(f"Parsing {file_ext.upper()} file..."):
             df = parse_file(uploaded, file_ext)
         st.success(f"✅ Loaded {len(df)} messages successfully!")
+
         st.subheader("Data Preview")
         st.dataframe(df.head(20))
     except Exception as e:
@@ -140,33 +162,37 @@ if uploaded is not None:
     df = load_and_clean(df, text_col="message")
 
     # ------------------------------------------------
-    # NLP & Threat Scoring
+    # NLP & Threat Scoring Section
     # ------------------------------------------------
     if "label" in df.columns:
         st.subheader("Model Training & Threat Scoring")
 
-        # Train baseline NLP model
+        # Train baseline NLP model (TF-IDF + Logistic Regression)
         tfidf = TfidfVectorizer(stop_words="english", max_features=5000)
         X = tfidf.fit_transform(df["message"].astype(str))
         y = df["label"]
         model = LogisticRegression(max_iter=1000)
         model.fit(X, y)
 
-        # Probabilities
-        nlp_prob = model.predict_proba(X)[:, 1] if len(set(y)) == 2 else model.predict_proba(X).max(axis=1)
+        # NLP probabilities
+        if len(set(y)) == 2:
+            nlp_prob = model.predict_proba(X)[:, 1]
+        else:
+            nlp_prob = model.predict_proba(X).max(axis=1)
 
-        # Metadata + Threat scoring
+        # Metadata features
         df_feat = extract_metadata_features(df, sender_col="sender",
                                             ts_col="timestamp", ip_col="ip",
                                             msg_col="message")
         meta_score = compute_metadata_score(df_feat)
 
+        # Combine scores
         st.markdown("#### Weight Adjustment")
         alpha = st.slider("Weight for NLP Probability (α)", 0.0, 1.0, 0.7, 0.05)
         threat = compute_threat_score(pd.Series(nlp_prob), meta_score, alpha=alpha)
         risk = label_risk(threat)
 
-        # Merge results
+        # Combine results
         out = df_feat.copy()
         out["nlp_prob"] = nlp_prob
         out["metadata_score"] = meta_score
@@ -200,6 +226,7 @@ if uploaded is not None:
         # ------------------------------------------------
         st.subheader("🚨 Flagged Messages (High Risk)")
         st.dataframe(out[out["risk"] == "High"].head(50))
+
         st.download_button(
             "💾 Download Scored CSV",
             data=out.to_csv(index=False).encode("utf-8"),
@@ -211,4 +238,3 @@ if uploaded is not None:
         st.warning("⚠️ No 'label' column found. Please provide labeled data for demo training.")
 else:
     st.info("Upload your email or chat log (CSV, MBOX, EML, MSG, JSON) to begin.")
-st.markdown('</div>', unsafe_allow_html=True)
