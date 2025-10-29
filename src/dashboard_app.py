@@ -105,23 +105,25 @@ h2::after, h3::after {{
     background: linear-gradient(90deg, #00b4d8, #0077b6, #90e0ef);
     color: white !important;
     border-radius: 10px;
-    padding: 0.5rem 1.1rem;
-    font-weight: 700;
+    padding: 0.6rem 1.3rem;
+    font-weight: 800;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
-    box-shadow: 0 0 12px rgba(0, 180, 216, 0.6), 0 0 24px rgba(0, 119, 182, 0.3);
-    transition: all 0.3s ease-in-out;
+    letter-spacing: 0.6px;
+    border: none;
+    box-shadow: 0 0 14px rgba(0, 180, 216, 0.7), 0 0 28px rgba(0, 119, 182, 0.5);
+    transition: all 0.4s ease-in-out;
     animation: shimmer 3s infinite linear;
     background-size: 200% 100%;
+    text-align: center;
 }}
 
 [data-testid="stFileUploader"] label div[role='button']:hover {{
     background-position: right center;
-    box-shadow: 0 0 18px rgba(0, 180, 216, 0.9), 0 0 32px rgba(0, 119, 182, 0.6);
-    transform: scale(1.03);
+    box-shadow: 0 0 22px rgba(0, 180, 216, 1), 0 0 40px rgba(0, 119, 182, 0.7);
+    transform: scale(1.05);
+    cursor: pointer;
 }}
 
-/* Shimmer animation */
 @keyframes shimmer {{
     0% {{ background-position: 0% 50%; }}
     50% {{ background-position: 100% 50%; }}
