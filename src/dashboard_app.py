@@ -55,6 +55,7 @@ else:
     chart_paper = "rgba(255,255,255,0)"
     chart_plot = "rgba(255,255,255,0)"
 
+
 # ----------------------------------------------------
 # CSS Styling
 # ----------------------------------------------------
@@ -88,14 +89,10 @@ h2::after, h3::after {{
     padding: 1rem;
     border: 1px solid {('rgba(255,255,255,0.2)' if theme=='Dark Mode' else 'rgba(0,0,0,0.12)')};
 }}
-
-/* Force all inner text (drag-and-drop, filename, etc.) to stay visible */
 [data-testid="stFileUploader"] * {{
     color: white !important;
     font-weight: 600;
 }}
-
-/* --- Blue-sparkling gradient Browse Files button (works for both Light & Dark) --- */
 [data-testid="stFileUploader"] label div[role='button'] {{
     background: linear-gradient(90deg, #00b4d8, #0077b6, #90e0ef);
     color: #ffffff !important;
@@ -111,33 +108,17 @@ h2::after, h3::after {{
     background-size: 200% 100%;
     filter: brightness(1.1);
 }}
-
 [data-testid="stFileUploader"] label div[role='button']:hover {{
     background-position: right center;
     box-shadow: 0 0 24px rgba(0,180,216,1), 0 0 48px rgba(0,119,182,0.7);
     transform: scale(1.05);
     cursor: pointer;
 }}
-
 @keyframes shimmer {{
     0% {{ background-position: 0% 50%; }}
     50% {{ background-position: 100% 50%; }}
     100% {{ background-position: 0% 50%; }}
 }}
-
-[data-testid="stFileUploader"] label div[role='button']:hover {{
-    background-position: right center;
-    box-shadow: 0 0 22px rgba(0, 180, 216, 1), 0 0 40px rgba(0, 119, 182, 0.7);
-    transform: scale(1.05);
-    cursor: pointer;
-}}
-
-@keyframes shimmer {{
-    0% {{ background-position: 0% 50%; }}
-    50% {{ background-position: 100% 50%; }}
-    100% {{ background-position: 0% 50%; }}
-}}
-
 
 /* ---- Buttons ---- */
 .stDownloadButton>button, .stButton>button {{
@@ -169,6 +150,24 @@ hr {{
     background: linear-gradient(90deg, {secondary_color}, {accent_color}, transparent);
     margin: 20px 0;
 }}
+
+/* === UNIVERSAL VISIBILITY FIXES === */
+.js-plotly-plot text,
+.plotly .xtick text,
+.plotly .ytick text,
+.plotly .legend text,
+.plotly .annotation-text {{
+    fill: {('#1a1a1a' if theme=='Light Mode' else '#e2e8f0')} !important;
+    color: {('#1a1a1a' if theme=='Light Mode' else '#e2e8f0')} !important;
+    font-weight: 600;
+}}
+.stAlert, .stInfo, .stWarning, .stSuccess {{
+    color: {('#1a1a1a' if theme=='Light Mode' else '#e2e8f0')} !important;
+    font-weight: 600;
+}}
+.stDataFrame th, .stDataFrame td {{
+    color: {('#1a1a1a' if theme=='Light Mode' else '#e2e8f0')} !important;
+}}
 </style>
 """, unsafe_allow_html=True)
 
@@ -182,6 +181,7 @@ st.markdown(
     f"<div style='color:{accent_color};font-size:16px;font-weight:600;'>🟢 System ready — multi-format ingest active (CSV • JSON • MBOX • EML • MSG)</div>",
     unsafe_allow_html=True
 )
+
 
 # ----------------------------------------------------
 # File Upload
