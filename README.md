@@ -1,43 +1,53 @@
-# 🔍 AI-Assisted Email & Chat Log Forensics  
+
+# 🔍 AI-Assisted Email & Chat Log Forensics
 
 ### 👩‍💻 About this Project
-While working on my weekly **Digital Forensics Lab** assignment for my cybersecurity course, I realized the exercises on analyzing email and chat logs could evolve into something bigger.  
-Instead of just following the lab steps, I decided to build an **AI-powered forensic investigation dashboard** that combines Natural Language Processing (NLP) and metadata correlation.  
-This project started as a class experiment — but quickly turned into a full-fledged **Streamlit app** that simulates how a real **Security Operations Center (SOC)** might detect insider threats and phishing attacks in corporate communications.  
-It became one of my most rewarding learning experiences, blending my interests in **AI, cybersecurity, and digital forensics**.
 
-🎯 **[Live Demo → Open on Streamlit Cloud](https://ai-email-chat-forensics-jdamdbcmrmxcwvd3appppjis.streamlit.app/)**  
+While completing a weekly **Digital Forensics Lab** for my cybersecurity course, I realized that simple email-log analysis could evolve into something more powerful.
+Instead of limiting the exercise to static datasets, I built an **AI-powered forensic investigation dashboard** that merges **Natural Language Processing (NLP)** with **metadata correlation**.
 
----
+This Streamlit app simulates how a real-world **Security Operations Center (SOC)** might detect **insider threats** or **phishing attacks** within corporate email and chat communications.
+It’s now a full-fledged, interactive **forensic intelligence system** — blending my interests in **AI, Cybersecurity, and Digital Forensics**.
 
-## 🧠 Overview  
-An **AI-driven digital forensics dashboard** that analyzes corporate email and chat logs to identify insider threats and phishing attempts.  
-The system applies **Natural Language Processing (NLP)** and **metadata correlation** to classify messages, compute threat scores, and visualize high-risk communications — all through an interactive Streamlit interface.
+🎯 **[Live Demo → Streamlit Cloud](https://ai-email-chat-forensics-jdamdbcmrmxcwvd3appppjis.streamlit.app/)**
 
 ---
 
-## ⚙️ Features  
-- 🧩 **NLP-based content analysis** (TF-IDF + Logistic Regression)  
-- 🕵️ **Metadata correlation** — sender domain, timestamp anomalies, IP pattern scoring  
-- 📊 **Interactive Streamlit dashboard** with dynamic charts & timelines  
-- 🧮 **Threat scoring engine** combining AI probability + metadata weight  
-- 📑 **Downloadable forensic report (CSV)** for investigation documentation  
-- ⚖️ Designed to align with **Daubert-standard admissibility** principles  
+## 🧠 Overview
+
+An **AI-driven digital forensics dashboard** that ingests and analyzes **multi-format communication data** — including **CSV, JSON, MBOX, EML, and MSG** files.
+The system automatically extracts metadata, applies **NLP-based content analysis**, assigns **threat scores**, and visualizes potential risks across timelines and risk distributions.
 
 ---
 
-## 🧰 Tech Stack  
-| Layer | Tools |
-|:------|:------|
-| **Language** | Python 3.10+ |
-| **Libraries** | Streamlit, Plotly, Scikit-Learn, Pandas, NLTK, Transformers |
-| **Visualization** | Plotly Express, Streamlit |
-| **Forensics** | WHOIS, Metadata parsing |
-| **Deployment** | Streamlit Cloud + GitHub Actions (optional) |
+## ⚙️ Key Features
+
+| Category                            | Description                                                                |
+| :---------------------------------- | :------------------------------------------------------------------------- |
+| 🧩 **Multi-Format Upload**          | Supports CSV, JSON, MBOX, EML and MSG files for flexible ingestion         |
+| 🧠 **AI-Powered Content Analysis**  | Uses TF-IDF and Logistic Regression to classify message risk               |
+| 🕵️ **Metadata Correlation Engine** | Flags anomalies in sender domains, timestamps and IP patterns              |
+| 📊 **Interactive Visualization**    | Live charts for risk distribution and timeline trends via Plotly           |
+| 🧮 **Weighted Threat Scoring**      | Combines NLP probability and metadata weight (α slider adjustable)         |
+| 💾 **Exportable Reports**           | Download scored forensic results as CSV for further analysis               |
+| 🌗 **Dual-Theme UI**                | Switch instantly between Dark and Light Mode with sparkling blue aesthetic |
+| 🧑‍💻 **SOC-Inspired Interface**    | Mimics the workflow of security analysts investigating incidents           |
 
 ---
 
-## 🚀 Run Locally  
+## 🧰 Tech Stack
+
+| Layer                | Tools                                         |
+| :------------------- | :-------------------------------------------- |
+| **Language**         | Python 3.10+                                  |
+| **Libraries**        | Streamlit, Plotly, Scikit-Learn, Pandas, NLTK |
+| **Visualization**    | Plotly Express + Custom CSS Themes            |
+| **Forensic Parsing** | email.parser, mailbox, WHOIS (optional)       |
+| **Deployment**       | Streamlit Cloud / GitHub Actions              |
+
+---
+
+## 🚀 Run Locally
 
 ```bash
 # Clone the repository
@@ -51,17 +61,19 @@ source venv/bin/activate
 # Install dependencies
 pip install -r requirements.txt
 
-# Launch the app
+# Launch the dashboard
 python -m streamlit run src/dashboard_app.py
-````
+```
 
-Open **[http://localhost:8501](http://localhost:8501)** in your browser.
+Then open **[http://localhost:8501](http://localhost:8501)** in your browser.
 
 ---
 
-## 🧪 Example CSV Format
+## 🧪 Example Input Formats
 
-To test the app, copy the text below into a file named **`test_emails.csv`**, then upload it in the dashboard.
+### 📧 CSV Example
+
+Create a file named `test_emails.csv` and upload it to the dashboard.
 
 ```csv
 message,label,sender,timestamp,ip
@@ -73,39 +85,44 @@ message,label,sender,timestamp,ip
 "Suspicious login detected on your account",1,security@bankalert.com,2025-10-24T02:15:00,23.55.44.11
 ```
 
+### 📬 Email Formats
+
+You can also upload `.eml`, `.msg`, or `.mbox` files directly.
+The parser automatically extracts sender, receiver, subject, timestamp, and message body for analysis.
+
 ---
 
 ## 🧩 What I Learned
 
-Building this project helped me:
+Building this project taught me how to:
 
-* Combine **digital forensics concepts** with **machine learning workflows**.
-* Implement **NLP models** (TF-IDF and Logistic Regression) for cybersecurity use cases.
-* Practice **data cleaning, feature extraction**, and **metadata scoring**.
-* Deploy a **Streamlit web app** and manage environment dependencies using Git and virtual environments.
-* Think like a **SOC analyst**, analyzing communication data for threat patterns.
+* Integrate **digital forensics principles** with **machine learning models**.
+* Design a **multi-source parsing pipeline** for emails and chat logs.
+* Apply TF-IDF and Logistic Regression for **threat classification**.
+* Create a responsive **Streamlit UI** with dual-theme support and animated elements.
+* Combine **metadata heuristics** and AI probabilities for risk scoring.
+* Think like a SOC analyst evaluating anomalous communication patterns.
 
 ---
 
 ## 🚧 Future Enhancements
 
-* Integrate **BERT or DistilBERT models** for deeper semantic threat detection.
-* Extend functionality to **chat platforms** like Slack or Microsoft Teams.
-* Add **real-time alerting** and visualization dashboards.
-* Build a **GeoIP-based map view** for sender locations.
-* Incorporate **log ingestion pipelines** using AWS or Elasticsearch for enterprise-scale use.
+* 🧠 Integrate **BERT/DistilBERT** for deep semantic analysis.
+* 💬 Extend support to chat platforms (Slack, Teams, Discord).
+* 🌍 Add **GeoIP mapping** and sender location visualization.
+* ⚙️ Enable real-time alerting with email/SIEM integration.
+* ☁️ Support cloud log ingestion via AWS S3 or Elasticsearch.
 
 ---
 
 ## 🙏 Acknowledgements
 
 This project was inspired by my **Digital Forensics and Investigation Lab** coursework.
-Special thanks to my professor and classmates for their feedback, which encouraged me to expand the weekly lab into a full-fledged AI-based forensic system.
+Thanks to my professor and peers for their feedback, which helped transform a weekly lab into a production-grade forensic dashboard.
 
 ---
 
-⭐ If you found this project interesting, feel free to **star the repo** and connect with me on [LinkedIn](https://www.linkedin.com/in/mnadgoud22/)!
-I’m always open to feedback, collaborations, or cybersecurity discussions. 😊
+⭐ If you found this project useful, please **star the repo** and connect with me on [LinkedIn](https://www.linkedin.com/in/mnadgoud22/)!
+I’m always open to collaboration and cybersecurity discussions 🚀
 
-```
 
