@@ -55,7 +55,9 @@ else:
     chart_paper = "rgba(255,255,255,0)"
     chart_plot = "rgba(255,255,255,0)"
 
-# Apply CSS
+# ----------------------------------------------------
+# CSS Styling
+# ----------------------------------------------------
 st.markdown(f"""
 <style>
 [data-testid="stAppViewContainer"] {{
@@ -65,6 +67,7 @@ st.markdown(f"""
 [data-testid="stHeader"] {{ background: transparent; height: 0rem; }}
 [data-testid="stSidebar"] {{ background: {sidebar_bg}; color: {text_color}; }}
 section[data-testid="stSidebar"] * {{ color: {text_color} !important; }}
+
 h1, h2, h3 {{
     color: {accent_color if theme=="Light Mode" else "#A7C7E7"};
     font-weight: 700;
@@ -77,29 +80,40 @@ h2::after, h3::after {{
     margin-top: 6px;
     background: linear-gradient(90deg, {accent_color}, {secondary_color});
 }}
+
+/* ---- File uploader fix ---- */
 [data-testid="stFileUploader"] {{
     background: {('rgba(255,255,255,0.08)' if theme=='Dark Mode' else 'rgba(0,0,0,0.04)')};
     border-radius: 12px;
     padding: 1rem;
     border: 1px solid {('rgba(255,255,255,0.2)' if theme=='Dark Mode' else 'rgba(0,0,0,0.12)')};
 }}
-[data-testid="stFileUploader"] * {{ color: {text_color} !important; }}
+[data-testid="stFileUploader"] * {{
+    color: {('white' if theme=='Light Mode' else text_color)} !important;
+    font-weight: 500;
+}}
 [data-testid="stFileUploader"] label div[role='button'] {{
     background: linear-gradient(90deg, {secondary_color}, {accent_color});
     color: white !important;
     border-radius: 8px;
     padding: 0.40rem 0.85rem;
     font-weight: 700;
+    box-shadow: 0 0 6px rgba(0, 119, 182, 0.4);
 }}
-.stDownloadButton>button {{
+
+/* ---- Buttons ---- */
+.stDownloadButton>button, .stButton>button {{
     background: linear-gradient(90deg, {accent_color}, {secondary_color});
     color: white !important;
     border-radius: 8px;
     font-weight: 700;
+    border: none;
 }}
-.stDownloadButton>button:hover {{
+.stDownloadButton>button:hover, .stButton>button:hover {{
     background: linear-gradient(90deg, {secondary_color}, {accent_color});
 }}
+
+/* ---- DataFrame styling ---- */
 .stDataFrame {{
     background: {('rgba(255,255,255,0.05)' if theme=='Dark Mode' else 'rgba(0,0,0,0.03)')};
     border-radius: 12px;
@@ -130,7 +144,6 @@ st.markdown(
     f"<div style='color:{accent_color};font-size:16px;font-weight:600;'>🟢 System ready — multi-format ingest active (CSV • JSON • MBOX • EML • MSG)</div>",
     unsafe_allow_html=True
 )
-
 
 # ----------------------------------------------------
 # File Upload
@@ -176,7 +189,6 @@ if uploaded is not None:
             st.warning("⚠️ Only one label class found — skipping model training. Using metadata-based scoring only.")
             nlp_prob = [0.5] * len(y)
 
-        # Metadata + Threat Score
         df_feat = extract_metadata_features(df, sender_col="sender",
                                             ts_col="timestamp", ip_col="ip",
                                             msg_col="message")
