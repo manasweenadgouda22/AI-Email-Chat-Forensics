@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
+import plotly.io as pio
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
 import os
@@ -25,7 +26,7 @@ theme = st.sidebar.radio("Select Theme", ["Dark Mode", "Light Mode"], index=0)
 
 
 # ----------------------------------------------------
-# Dynamic Styling
+# Dynamic Styling (colors + Plotly template)
 # ----------------------------------------------------
 if theme == "Dark Mode":
     background_css = """
@@ -37,6 +38,9 @@ if theme == "Dark Mode":
     sidebar_bg = "#0c2340"
     text_color = "#e2e8f0"
     button_text_color = "white"
+    pio.templates.default = "plotly_dark"
+    chart_paper = "rgba(0,0,0,0)"
+    chart_plot = "rgba(0,0,0,0)"
 else:
     background_css = """
     background: linear-gradient(180deg, #ffffff 0%, #f8f9fb 100%);
@@ -47,22 +51,32 @@ else:
     sidebar_bg = "#edf6f9"
     text_color = "#1a1a1a"
     button_text_color = "white"
+    pio.templates.default = "plotly_white"
+    chart_paper = "rgba(255,255,255,0)"
+    chart_plot = "rgba(255,255,255,0)"
 
-# Apply CSS
+# Apply CSS (includes stronger selectors for uploader + sidebar)
 st.markdown(f"""
 <style>
+/* App container */
 [data-testid="stAppViewContainer"] {{
     {background_css}
     font-family: 'Inter', sans-serif;
 }}
+/* Remove top white header bar */
 [data-testid="stHeader"] {{
     background: transparent;
     height: 0rem;
 }}
+/* Sidebar */
 [data-testid="stSidebar"] {{
     background: {sidebar_bg};
     color: {text_color};
 }}
+section[data-testid="stSidebar"] * {{
+    color: {text_color} !important;   /* ensure radio/labels/legend are readable */
+}}
+/* Headings */
 h1, h2, h3 {{
     color: {accent_color if theme=="Light Mode" else "#A7C7E7"};
     font-weight: 700;
@@ -86,32 +100,28 @@ button[kind="primary"], .stButton>button {{
 button:hover {{
     background: linear-gradient(90deg, {accent_color}, {secondary_color});
 }}
-/* File uploader + Browse button fix */
+/* File uploader: container, filename, helper text, and Browse button */
 [data-testid="stFileUploader"] {{
-    background: rgba(255, 255, 255, 0.08);
+    background: {('rgba(255,255,255,0.08)' if theme=='Dark Mode' else 'rgba(0,0,0,0.04)')};
     border-radius: 12px;
     padding: 1rem;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    color: {text_color};
+    border: 1px solid {('rgba(255,255,255,0.2)' if theme=='Dark Mode' else 'rgba(0,0,0,0.12)')};
 }}
+[data-testid="stFileUploader"] * {{
+    color: {text_color} !important;   /* force inner text (incl. filename) to be visible */
+}}
+/* streamlit renders "Browse files" as a label>div[role=button] */
 [data-testid="stFileUploader"] label div[role='button'] {{
     background: {secondary_color};
     color: white !important;
     border-radius: 8px;
-    padding: 0.4rem 0.8rem;
-    font-weight: 600;
+    padding: 0.40rem 0.85rem;
+    font-weight: 700;
+    filter: none !important;
 }}
-[data-testid="stFileUploader"] p {{
-    color: {text_color} !important;
-}}
-/* File name text color fix */
-[data-testid="stFileUploaderFileName"] {{
-    color: {text_color} !important;
-    font-weight: 600;
-}}
-/* DataFrame */
+/* DataFrame wrap */
 .stDataFrame {{
-    background: rgba(255, 255, 255, 0.05);
+    background: {('rgba(255,255,255,0.05)' if theme=='Dark Mode' else 'rgba(0,0,0,0.03)')};
     border-radius: 12px;
     padding: 1rem;
 }}
@@ -120,7 +130,7 @@ button:hover {{
 }}
 /* Alerts */
 .stAlert {{
-    background-color: rgba(0, 119, 182, 0.15);
+    background-color: {('rgba(0, 119, 182, 0.15)' if theme=='Light Mode' else 'rgba(0, 119, 182, 0.2)')};
     border: 1px solid {accent_color};
     border-radius: 10px;
     color: {text_color};
@@ -130,35 +140,30 @@ button:hover {{
     background: linear-gradient(90deg, {accent_color}, {secondary_color});
     color: white !important;
     border-radius: 8px;
-    font-weight: 600;
+    font-weight: 700;
 }}
 .stDownloadButton>button:hover {{
     background: linear-gradient(90deg, {secondary_color}, {accent_color});
 }}
-/* Plot background */
-.plotly {{
-    background: rgba(255, 255, 255, 0.08) !important;
+/* Plot containers */
+.plotly, .js-plotly-plot, .plot-container {{
+    background: transparent !important;
     border-radius: 12px;
-    padding: 1rem;
 }}
-/* Slider fix */
+/* Slider: label & handle visibility */
 .stSlider label {{
     color: {accent_color if theme=="Light Mode" else "#A7C7E7"} !important;
-    font-weight: 600;
+    font-weight: 700;
 }}
 .stSlider div[role='slider'] {{
     background: {accent_color} !important;
 }}
+/* Subtle divider */
 hr {{
     border: none;
     height: 1px;
     background: linear-gradient(90deg, {secondary_color}, {accent_color}, transparent);
     margin: 20px 0;
-}}
-/* Sidebar radio buttons fix */
-section[data-testid="stSidebar"] label {{
-    color: {text_color} !important;
-    font-weight: 600;
 }}
 </style>
 """, unsafe_allow_html=True)
@@ -169,14 +174,18 @@ section[data-testid="stSidebar"] label {{
 # ----------------------------------------------------
 st.title("🔍 AI-Assisted Email & Chat Log Forensics")
 st.markdown("Analyze digital communications using NLP & metadata correlation to flag potentially risky or malicious behavior.")
-
-# Status line
-st.markdown(f"<div style='color:{accent_color};font-size:16px;font-weight:600;'>🟢 System ready — multi-format ingest active (CSV • JSON • MBOX • EML • MSG)</div>", unsafe_allow_html=True)
+st.markdown(
+    f"<div style='color:{accent_color};font-size:16px;font-weight:600;'>🟢 System ready — multi-format ingest active (CSV • JSON • MBOX • EML • MSG)</div>",
+    unsafe_allow_html=True
+)
 
 # ----------------------------------------------------
 # File Upload Section
 # ----------------------------------------------------
-st.markdown(f"<h3 style='font-weight:700; margin-top:10px; color:{accent_color if theme=='Light Mode' else '#A7C7E7'};'>📂 Upload your email or chat data</h3>", unsafe_allow_html=True)
+st.markdown(
+    f"<h3 style='font-weight:700; margin-top:10px; color:{accent_color if theme=='Light Mode' else '#A7C7E7'};'>📂 Upload your email or chat data</h3>",
+    unsafe_allow_html=True
+)
 
 uploaded = st.file_uploader("", type=["csv", "mbox", "eml", "msg", "json"])
 
@@ -193,8 +202,12 @@ if uploaded is not None:
         st.error(f"❌ Could not parse file: {e}")
         st.stop()
 
+    # Clean dataframe
     df = load_and_clean(df, text_col="message")
 
+    # ------------------------------------------------
+    # NLP & Threat Scoring
+    # ------------------------------------------------
     if "label" in df.columns:
         st.subheader("Model Training & Threat Scoring")
 
@@ -204,11 +217,10 @@ if uploaded is not None:
         model = LogisticRegression(max_iter=1000)
         model.fit(X, y)
 
-        if len(set(y)) == 2:
-            nlp_prob = model.predict_proba(X)[:, 1]
-        else:
-            nlp_prob = model.predict_proba(X).max(axis=1)
+        # NLP probabilities
+        nlp_prob = model.predict_proba(X)[:, 1] if len(set(y)) == 2 else model.predict_proba(X).max(axis=1)
 
+        # Metadata + threat score
         df_feat = extract_metadata_features(df, sender_col="sender",
                                             ts_col="timestamp", ip_col="ip",
                                             msg_col="message")
@@ -225,9 +237,19 @@ if uploaded is not None:
         out["threat_score"] = threat
         out["risk"] = risk
 
+        # ------------------------------------------------
+        # Charts (auto-themed)
+        # ------------------------------------------------
         st.subheader("📊 Threat Overview")
-        fig = px.histogram(out, x="risk", title="Risk Distribution",
-                           color="risk", color_discrete_sequence=px.colors.qualitative.Safe)
+        fig = px.histogram(
+            out,
+            x="risk",
+            title="Risk Distribution",
+            color="risk",
+            color_discrete_sequence=px.colors.qualitative.Safe,
+            template=pio.templates.default
+        )
+        fig.update_layout(paper_bgcolor=chart_paper, plot_bgcolor=chart_plot)
         st.plotly_chart(fig, use_container_width=True)
 
         st.subheader("📈 Timeline View")
@@ -235,15 +257,20 @@ if uploaded is not None:
             try:
                 out_sorted = out.copy()
                 out_sorted["timestamp"] = pd.to_datetime(out_sorted["timestamp"], errors="coerce")
-                fig2 = px.scatter(out_sorted.sort_values("timestamp"),
-                                  x="timestamp", y="threat_score",
-                                  color="risk",
-                                  hover_data=["sender", "nlp_prob", "metadata_score"])
+                fig2 = px.scatter(
+                    out_sorted.sort_values("timestamp"),
+                    x="timestamp", y="threat_score",
+                    color="risk",
+                    hover_data=["sender", "nlp_prob", "metadata_score"],
+                    template=pio.templates.default
+                )
                 fig2.update_traces(mode="lines+markers")
+                fig2.update_layout(paper_bgcolor=chart_paper, plot_bgcolor=chart_plot)
                 st.plotly_chart(fig2, use_container_width=True)
             except Exception as e:
                 st.warning(f"⚠️ Could not render timeline: {e}")
 
+        # High-risk table + export
         st.subheader("🚨 Flagged Messages (High Risk)")
         st.dataframe(out[out["risk"] == "High"].head(50))
 
