@@ -100,14 +100,34 @@ h2::after, h3::after {{
     color: {('white' if theme=='Light Mode' else text_color)} !important;
 }}
 
-[data-testid="stFileUploader"] label div[role='button'] {{
-    background: linear-gradient(90deg, {secondary_color}, {accent_color});
+/* Sparkling blue theme for the Browse Files button */
+[data-testid="stFileUploader"] label div[role='button'] {
+    background: linear-gradient(90deg, #00b4d8, #0077b6, #90e0ef);
     color: white !important;
-    border-radius: 8px;
-    padding: 0.40rem 0.85rem;
+    border-radius: 10px;
+    padding: 0.5rem 1.1rem;
     font-weight: 700;
-    box-shadow: 0 0 6px rgba(0, 119, 182, 0.4);
-}}
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    box-shadow: 0 0 12px rgba(0, 180, 216, 0.6), 0 0 24px rgba(0, 119, 182, 0.3);
+    transition: all 0.3s ease-in-out;
+    animation: shimmer 3s infinite linear;
+    background-size: 200% 100%;
+}
+
+[data-testid="stFileUploader"] label div[role='button']:hover {
+    background-position: right center;
+    box-shadow: 0 0 18px rgba(0, 180, 216, 0.9), 0 0 32px rgba(0, 119, 182, 0.6);
+    transform: scale(1.03);
+}
+
+/* Shimmer animation */
+@keyframes shimmer {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
 
 
 
