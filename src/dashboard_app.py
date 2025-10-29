@@ -110,6 +110,7 @@ h2::after, h3::after {{
 }}
 
 
+
 /* ---- Buttons ---- */
 .stDownloadButton>button, .stButton>button {{
     background: linear-gradient(90deg, {accent_color}, {secondary_color});
