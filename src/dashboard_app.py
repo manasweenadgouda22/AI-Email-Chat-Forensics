@@ -96,17 +96,27 @@ button[kind="primary"], .stButton>button {{
 button:hover {{
     background: linear-gradient(90deg, {accent_color}, {secondary_color});
 }}
-/* File uploader full redesign */
+
+/* ----------- FILE UPLOADER FIXED VERSION ----------- */
 [data-testid="stFileUploader"] {{
     background: {('rgba(255,255,255,0.08)' if theme=='Dark Mode' else '#f1f5f9')};
     border-radius: 12px;
     padding: 1rem;
     border: 1px solid {('rgba(255,255,255,0.2)' if theme=='Dark Mode' else '#cbd5e1')};
+    box-shadow: 0 0 10px rgba(0, 183, 255, 0.15);
 }}
+/* Make text always visible inside upload box */
 [data-testid="stFileUploader"] * {{
-    color: {('white' if theme=='Dark Mode' else '#1e293b')} !important;
+    color: white !important;
 }}
-/* Always blue Browse files button */
+/* Inner dark section fix for Light Mode */
+[data-testid="stFileUploader"] section div div div {{
+    background-color: #1e293b !important;
+    border-radius: 10px !important;
+    color: white !important;
+    font-weight: 600;
+}}
+/* Blue gradient Browse button */
 [data-testid="stFileUploader"] label div[role='button'] {{
     background: linear-gradient(90deg, #0077b6, #00b4d8);
     color: white !important;
@@ -121,10 +131,12 @@ button:hover {{
     transform: scale(1.03);
     box-shadow: 0 0 12px rgba(0, 183, 255, 0.8);
 }}
+/* File name text */
 [data-testid="stFileUploaderFileName"] {{
-    color: {('white' if theme=='Dark Mode' else '#0f172a')} !important;
+    color: white !important;
     font-weight: 600;
 }}
+
 /* DataFrame */
 .stDataFrame {{
     background: {('rgba(255,255,255,0.05)' if theme=='Dark Mode' else 'rgba(0,0,0,0.03)')};
@@ -134,6 +146,7 @@ button:hover {{
 .stDataFrame table {{
     color: inherit !important;
 }}
+
 /* Alerts */
 .stAlert {{
     background-color: {('rgba(0, 119, 182, 0.15)' if theme=='Light Mode' else 'rgba(0, 119, 182, 0.2)')};
@@ -141,6 +154,7 @@ button:hover {{
     border-radius: 10px;
     color: {text_color};
 }}
+
 /* Download button gradient */
 .stDownloadButton>button {{
     background: linear-gradient(90deg, {secondary_color}, {accent_color});
@@ -154,10 +168,14 @@ button:hover {{
     transform: scale(1.03);
     box-shadow: 0 0 12px rgba(0, 183, 255, 0.8);
 }}
+
+/* Charts */
 .plotly, .js-plotly-plot, .plot-container {{
     background: transparent !important;
     border-radius: 12px;
 }}
+
+/* Slider */
 .stSlider label {{
     color: {accent_color if theme=="Light Mode" else "#A7C7E7"} !important;
     font-weight: 700;
