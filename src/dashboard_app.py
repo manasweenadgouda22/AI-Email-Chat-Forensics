@@ -81,7 +81,7 @@ h2::after, h3::after {{
     background: linear-gradient(90deg, {accent_color}, {secondary_color});
 }}
 
-/* ---- File uploader text fix ---- */
+/* --- File Uploader Container --- */
 [data-testid="stFileUploader"] {{
     background: {('rgba(255,255,255,0.08)' if theme=='Dark Mode' else 'rgba(0,0,0,0.04)')};
     border-radius: 12px;
@@ -89,32 +89,40 @@ h2::after, h3::after {{
     border: 1px solid {('rgba(255,255,255,0.2)' if theme=='Dark Mode' else 'rgba(0,0,0,0.12)')};
 }}
 
+/* Force all inner text (drag-and-drop, filename, etc.) to stay visible */
 [data-testid="stFileUploader"] * {{
-    color: {text_color} !important;
+    color: white !important;
+    font-weight: 600;
 }}
 
-[data-testid="stFileUploader"] div[role='button'],
-[data-testid="stFileUploader"] span,
-[data-testid="stFileUploader"] p,
-[data-testid="stFileUploader"] small {{
-    color: {('white' if theme=='Light Mode' else text_color)} !important;
-}}
-
-/* Sparkling blue theme for the Browse Files button */
+/* --- Blue-sparkling gradient Browse Files button (works for both Light & Dark) --- */
 [data-testid="stFileUploader"] label div[role='button'] {{
     background: linear-gradient(90deg, #00b4d8, #0077b6, #90e0ef);
-    color: white !important;
+    color: #ffffff !important;
     border-radius: 10px;
-    padding: 0.6rem 1.3rem;
+    padding: 0.55rem 1.2rem;
     font-weight: 800;
     text-transform: uppercase;
     letter-spacing: 0.6px;
     border: none;
-    box-shadow: 0 0 14px rgba(0, 180, 216, 0.7), 0 0 28px rgba(0, 119, 182, 0.5);
-    transition: all 0.4s ease-in-out;
+    box-shadow: 0 0 16px rgba(0,180,216,0.8), 0 0 32px rgba(0,119,182,0.5);
+    transition: all 0.3s ease-in-out;
     animation: shimmer 3s infinite linear;
     background-size: 200% 100%;
-    text-align: center;
+    filter: brightness(1.1);
+}}
+
+[data-testid="stFileUploader"] label div[role='button']:hover {{
+    background-position: right center;
+    box-shadow: 0 0 24px rgba(0,180,216,1), 0 0 48px rgba(0,119,182,0.7);
+    transform: scale(1.05);
+    cursor: pointer;
+}}
+
+@keyframes shimmer {{
+    0% {{ background-position: 0% 50%; }}
+    50% {{ background-position: 100% 50%; }}
+    100% {{ background-position: 0% 50%; }}
 }}
 
 [data-testid="stFileUploader"] label div[role='button']:hover {{
