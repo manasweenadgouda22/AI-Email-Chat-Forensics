@@ -81,17 +81,25 @@ h2::after, h3::after {{
     background: linear-gradient(90deg, {accent_color}, {secondary_color});
 }}
 
-/* ---- File uploader fix ---- */
+/* ---- File uploader text fix ---- */
 [data-testid="stFileUploader"] {{
     background: {('rgba(255,255,255,0.08)' if theme=='Dark Mode' else 'rgba(0,0,0,0.04)')};
     border-radius: 12px;
     padding: 1rem;
     border: 1px solid {('rgba(255,255,255,0.2)' if theme=='Dark Mode' else 'rgba(0,0,0,0.12)')};
 }}
+
 [data-testid="stFileUploader"] * {{
-    color: {('white' if theme=='Light Mode' else text_color)} !important;
-    font-weight: 500;
+    color: {text_color} !important;
 }}
+
+[data-testid="stFileUploader"] div[role='button'],
+[data-testid="stFileUploader"] span,
+[data-testid="stFileUploader"] p,
+[data-testid="stFileUploader"] small {{
+    color: {('white' if theme=='Light Mode' else text_color)} !important;
+}}
+
 [data-testid="stFileUploader"] label div[role='button'] {{
     background: linear-gradient(90deg, {secondary_color}, {accent_color});
     color: white !important;
@@ -100,6 +108,7 @@ h2::after, h3::after {{
     font-weight: 700;
     box-shadow: 0 0 6px rgba(0, 119, 182, 0.4);
 }}
+
 
 /* ---- Buttons ---- */
 .stDownloadButton>button, .stButton>button {{
