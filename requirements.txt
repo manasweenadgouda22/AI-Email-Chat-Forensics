@@ -1,28 +1,26 @@
-# Core data libraries
+# Core Data & ML Libraries
 pandas
 numpy
 scikit-learn
+joblib
 
-# NLP / AI libraries
+# Natural Language Processing
 nltk
 spacy
 transformers
 torch
 
-# Visualization and dashboard
-plotly
+# Dashboard & Visualization
 streamlit
+plotly
 
-# File parsing & metadata extraction
+# File Parsing & Metadata Extraction
 extract-msg
 tldextract
 python-whois
 chardet
 python-magic
 
-# Reporting tools
+# Reporting / PDF Generation
 fpdf
 reportlab
-
-# Optional (for model training, reproducibility)
-joblib
