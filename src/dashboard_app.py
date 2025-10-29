@@ -15,110 +15,107 @@ from threat_scoring import compute_metadata_score, compute_threat_score, label_r
 
 
 # ----------------------------------------------------
-# Page Setup & Styling
+# Page Setup
 # ----------------------------------------------------
 st.set_page_config(page_title="AI Email & Chat Forensics", layout="wide")
 
-st.markdown("""
-<style>
-/* Global App Background */
-[data-testid="stAppViewContainer"] {
+# Sidebar Theme Toggle
+st.sidebar.title("⚙️ Settings")
+theme = st.sidebar.radio("Select Theme", ["Dark Mode", "Light Mode"], index=0)
+
+
+# ----------------------------------------------------
+# Dynamic Styling
+# ----------------------------------------------------
+if theme == "Dark Mode":
+    background_css = """
     background: radial-gradient(circle at top left, #071E3D 0%, #0B2A59 60%, #081229 100%);
     color: #e2e8f0;
+    """
+    accent_color = "#00b4d8"
+    secondary_color = "#0077b6"
+else:
+    background_css = """
+    background: linear-gradient(180deg, #ffffff 0%, #f8f9fb 100%);
+    color: #1a1a1a;
+    """
+    accent_color = "#0077b6"
+    secondary_color = "#00b4d8"
+
+# Apply CSS
+st.markdown(f"""
+<style>
+[data-testid="stAppViewContainer"] {{
+    {background_css}
     font-family: 'Inter', sans-serif;
-}
-
-/* Remove top white padding */
-[data-testid="stHeader"] {
-    background: transparent;
-    height: 0rem;
-}
-
-/* Sidebar */
-[data-testid="stSidebar"] {
-    background: #0c2340;
-    color: #e2e8f0;
-}
-
-/* Headings */
-h1, h2, h3 {
-    color: #A7C7E7;
-    font-weight: 700;
-}
-
-/* Subtle glowing section titles */
-h2::after, h3::after {
+}}
+[data-testid="stHeader"] {{ background: transparent; height: 0rem; }}
+[data-testid="stSidebar"] {{ background: {secondary_color if theme=="Dark Mode" else "#edf6f9"}; color: inherit; }}
+h1, h2, h3 {{ color: {accent_color if theme=="Light Mode" else "#A7C7E7"}; font-weight: 700; }}
+h2::after, h3::after {{
     content: "";
     display: block;
     height: 2px;
     width: 60px;
     margin-top: 6px;
-    background: linear-gradient(90deg, #00b4d8, #0077b6);
-}
-
-/* Upload box & buttons */
-button[kind="primary"], .stButton>button {
-    background: linear-gradient(90deg, #0077b6, #00b4d8);
+    background: linear-gradient(90deg, {accent_color}, {secondary_color});
+}}
+button[kind="primary"], .stButton>button {{
+    background: linear-gradient(90deg, {secondary_color}, {accent_color});
     color: white !important;
     border-radius: 8px;
-    border: none;
     font-weight: 600;
-}
-button:hover {
-    background: linear-gradient(90deg, #00b4d8, #0096c7);
-}
-
-/* File uploader visibility */
-[data-testid="stFileUploader"] {
+    border: none;
+}}
+button:hover {{
+    background: linear-gradient(90deg, {accent_color}, {secondary_color});
+}}
+[data-testid="stFileUploader"] {{
     background: rgba(255, 255, 255, 0.08);
     border-radius: 12px;
     padding: 1rem;
     border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-/* DataFrame styling */
-.stDataFrame {
+}}
+.stDataFrame {{
     background: rgba(255, 255, 255, 0.05);
     border-radius: 12px;
     padding: 1rem;
-}
-.stDataFrame table {
-    color: #e2e8f0 !important;
-}
-
-/* Info / success boxes */
-.stAlert {
+}}
+.stDataFrame table {{ color: inherit !important; }}
+.stAlert {{
     background-color: rgba(0, 119, 182, 0.2);
-    border: 1px solid #00b4d8;
+    border: 1px solid {accent_color};
     border-radius: 10px;
-    color: #e2e8f0;
-}
-
-/* Download button */
-.stDownloadButton>button {
-    background: linear-gradient(90deg, #00b4d8, #0096c7);
+    color: inherit;
+}}
+.stDownloadButton>button {{
+    background: linear-gradient(90deg, {accent_color}, {secondary_color});
     color: white !important;
     border-radius: 8px;
     font-weight: 600;
-}
-.stDownloadButton>button:hover {
-    background: linear-gradient(90deg, #48cae4, #00b4d8);
-}
-
-/* Plot background */
-.plotly {
+}}
+.stDownloadButton>button:hover {{
+    background: linear-gradient(90deg, {secondary_color}, {accent_color});
+}}
+.plotly {{
     background: rgba(255, 255, 255, 0.08) !important;
     border-radius: 12px;
     padding: 1rem;
-}
-
-/* Make horizontal rule subtle and glowing */
-hr {
+}}
+/* Slider label visibility fix */
+.stSlider label {{
+    color: {accent_color if theme=="Light Mode" else "#A7C7E7"} !important;
+    font-weight: 600;
+}}
+.stSlider div[role='slider'] {{
+    background: {accent_color} !important;
+}}
+hr {{
     border: none;
     height: 1px;
-    background: linear-gradient(90deg, #0077b6, #00b4d8, transparent);
+    background: linear-gradient(90deg, {secondary_color}, {accent_color}, transparent);
     margin: 20px 0;
-}
+}}
 </style>
 """, unsafe_allow_html=True)
 
@@ -130,12 +127,12 @@ st.title("🔍 AI-Assisted Email & Chat Log Forensics")
 st.markdown("Analyze digital communications using NLP & metadata correlation to flag potentially risky or malicious behavior.")
 
 # Status line
-st.markdown("<div style='color:#9BE2FF;font-size:16px;font-weight:600;'>🟢 System ready — multi-format ingest active (CSV • JSON • MBOX • EML • MSG)</div>", unsafe_allow_html=True)
+st.markdown(f"<div style='color:{accent_color};font-size:16px;font-weight:600;'>🟢 System ready — multi-format ingest active (CSV • JSON • MBOX • EML • MSG)</div>", unsafe_allow_html=True)
 
 # ----------------------------------------------------
 # File Upload Section
 # ----------------------------------------------------
-st.markdown("<h3 style='color:#A7C7E7; font-weight:700; margin-top:10px;'>📂 Upload your email or chat data</h3>", unsafe_allow_html=True)
+st.markdown("<h3 style='font-weight:700; margin-top:10px;'>📂 Upload your email or chat data</h3>", unsafe_allow_html=True)
 
 uploaded = st.file_uploader(
     "",
