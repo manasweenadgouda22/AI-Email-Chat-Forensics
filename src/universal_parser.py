@@ -1,77 +1,117 @@
 import pandas as pd
-import mailbox, email, json
-from email import policy
+import mailbox
+import email
+import extract_msg
+import json
+from io import BytesIO, StringIO
 
-def parse_csv(file):
-    """Parse CSV files."""
-    return pd.read_csv(file)
 
-def parse_mbox(file):
-    """Parse Gmail .mbox exports."""
-    mbox = mailbox.mbox(file)
-    data = []
-    for msg in mbox:
-        data.append({
-            "sender": msg["from"],
-            "receiver": msg["to"],
-            "subject": msg["subject"],
-            "message": msg.get_payload(),
-            "timestamp": msg["date"],
-            "ip": None
-        })
-    return pd.DataFrame(data)
+def parse_file(uploaded_file, ext):
+    """
+    Parse uploaded file and return a unified pandas DataFrame.
+    Handles CSV, JSON, EML, MSG, and MBOX formats.
+    """
 
-def parse_eml(file):
-    """Parse individual .eml email files."""
-    msg = email.message_from_bytes(file.read(), policy=policy.default)
-    body = ""
-    if msg.is_multipart():
-        for part in msg.walk():
-            if part.get_content_type() == "text/plain":
-                body += part.get_content()
+    ext = ext.lower()
+    messages = []
+
+    # -------------------------------
+    # CSV
+    # -------------------------------
+    if ext == ".csv":
+        return pd.read_csv(uploaded_file)
+
+    # -------------------------------
+    # JSON
+    # -------------------------------
+    elif ext == ".json":
+        try:
+            return pd.read_json(uploaded_file)
+        except Exception:
+            uploaded_file.seek(0)
+            data = json.load(uploaded_file)
+            return pd.DataFrame(data)
+
+    # -------------------------------
+    # EML
+    # -------------------------------
+    elif ext == ".eml":
+        raw_bytes = uploaded_file.read()
+        msg = email.message_from_bytes(raw_bytes)
+
+        body = ""
+        if msg.is_multipart():
+            for part in msg.walk():
+                if part.get_content_type() == "text/plain":
+                    body += part.get_payload(decode=True).decode(errors="ignore")
+        else:
+            body = msg.get_payload(decode=True).decode(errors="ignore")
+
+        return pd.DataFrame([{
+            "sender": msg.get("From", ""),
+            "receiver": msg.get("To", ""),
+            "subject": msg.get("Subject", ""),
+            "message": body.strip(),
+            "timestamp": msg.get("Date", None),
+            "ip": None,
+            "label": "Unlabeled"
+        }])
+
+    # -------------------------------
+    # MSG (Outlook format)
+    # -------------------------------
+    elif ext == ".msg":
+        try:
+            msg = extract_msg.Message(uploaded_file)
+            return pd.DataFrame([{
+                "sender": msg.sender,
+                "receiver": msg.to,
+                "subject": msg.subject,
+                "message": msg.body.strip(),
+                "timestamp": msg.date,
+                "ip": None,
+                "label": "Unlabeled"
+            }])
+        except Exception as e:
+            raise ValueError(f"Failed to parse MSG file: {e}")
+
+    # -------------------------------
+    # MBOX
+    # -------------------------------
+    elif ext == ".mbox":
+        # Convert uploaded file into mailbox.mbox readable form
+        uploaded_file.seek(0)
+        mbox_data = uploaded_file.read()
+        temp_path = "/tmp/temp_mbox.mbox"
+        with open(temp_path, "wb") as f:
+            f.write(mbox_data)
+
+        mbox = mailbox.mbox(temp_path)
+        for msg in mbox:
+            try:
+                body = ""
+                if msg.is_multipart():
+                    for part in msg.walk():
+                        if part.get_content_type() == "text/plain":
+                            body += part.get_payload(decode=True).decode(errors="ignore")
+                else:
+                    body = msg.get_payload(decode=True).decode(errors="ignore")
+
+                messages.append({
+                    "sender": msg.get("from", ""),
+                    "receiver": msg.get("to", ""),
+                    "subject": msg.get("subject", ""),
+                    "message": body.strip(),
+                    "timestamp": msg.get("date", None),
+                    "ip": None,
+                    "label": "Unlabeled"
+                })
+            except Exception:
+                continue
+        return pd.DataFrame(messages)
+
+    # -------------------------------
+    # Unsupported
+    # -------------------------------
     else:
-        body = msg.get_content()
-    return pd.DataFrame([{
-        "sender": msg["from"],
-        "receiver": msg["to"],
-        "subject": msg["subject"],
-        "message": body,
-        "timestamp": msg["date"],
-        "ip": None
-    }])
-
-def parse_msg(file):
-    """Parse Outlook .msg files."""
-    import extract_msg
-    msg = extract_msg.Message(file)
-    return pd.DataFrame([{
-        "sender": msg.sender,
-        "receiver": msg.to,
-        "subject": msg.subject,
-        "message": msg.body,
-        "timestamp": msg.date,
-        "ip": None
-    }])
-
-def parse_json(file):
-    """Parse JSON chat exports (Slack, Teams, etc.)."""
-    content = json.load(file)
-    if isinstance(content, list):
-        return pd.DataFrame(content)
-    else:
-        return pd.DataFrame([content])
-
-def parse_file(file, extension):
-    """Main entry: route to correct parser based on file extension."""
-    if extension == ".csv":
-        return parse_csv(file)
-    elif extension == ".mbox":
-        return parse_mbox(file)
-    elif extension == ".eml":
-        return parse_eml(file)
-    elif extension == ".msg":
-        return parse_msg(file)
-    elif extension == ".json":
-        return parse_json(file)
-    else:
-        raise ValueError(f"Unsupported file type: {extension}")
+        raise ValueError(f"Unsupported file format: {ext}")
