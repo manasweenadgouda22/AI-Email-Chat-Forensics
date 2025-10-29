@@ -24,7 +24,6 @@ st.set_page_config(page_title="AI Email & Chat Forensics", layout="wide")
 st.sidebar.title("⚙️ Settings")
 theme = st.sidebar.radio("Select Theme", ["Dark Mode", "Light Mode"], index=0)
 
-
 # ----------------------------------------------------
 # Dynamic Styling (colors + Plotly template)
 # ----------------------------------------------------
@@ -55,28 +54,26 @@ else:
     chart_paper = "rgba(255,255,255,0)"
     chart_plot = "rgba(255,255,255,0)"
 
-# Apply CSS (includes stronger selectors for uploader + sidebar)
+# ----------------------------------------------------
+# CSS Styling
+# ----------------------------------------------------
 st.markdown(f"""
 <style>
-/* App container */
 [data-testid="stAppViewContainer"] {{
     {background_css}
     font-family: 'Inter', sans-serif;
 }}
-/* Remove top white header bar */
 [data-testid="stHeader"] {{
     background: transparent;
     height: 0rem;
 }}
-/* Sidebar */
 [data-testid="stSidebar"] {{
     background: {sidebar_bg};
     color: {text_color};
 }}
 section[data-testid="stSidebar"] * {{
-    color: {text_color} !important;   /* ensure radio/labels/legend are readable */
+    color: {text_color} !important;
 }}
-/* Headings */
 h1, h2, h3 {{
     color: {accent_color if theme=="Light Mode" else "#A7C7E7"};
     font-weight: 700;
@@ -89,7 +86,6 @@ h2::after, h3::after {{
     margin-top: 6px;
     background: linear-gradient(90deg, {accent_color}, {secondary_color});
 }}
-/* Buttons */
 button[kind="primary"], .stButton>button {{
     background: linear-gradient(90deg, {secondary_color}, {accent_color});
     color: {button_text_color} !important;
@@ -100,26 +96,36 @@ button[kind="primary"], .stButton>button {{
 button:hover {{
     background: linear-gradient(90deg, {accent_color}, {secondary_color});
 }}
-/* File uploader: container, filename, helper text, and Browse button */
+/* File uploader full redesign */
 [data-testid="stFileUploader"] {{
-    background: {('rgba(255,255,255,0.08)' if theme=='Dark Mode' else 'rgba(0,0,0,0.04)')};
+    background: {('rgba(255,255,255,0.08)' if theme=='Dark Mode' else '#f1f5f9')};
     border-radius: 12px;
     padding: 1rem;
-    border: 1px solid {('rgba(255,255,255,0.2)' if theme=='Dark Mode' else 'rgba(0,0,0,0.12)')};
+    border: 1px solid {('rgba(255,255,255,0.2)' if theme=='Dark Mode' else '#cbd5e1')};
 }}
 [data-testid="stFileUploader"] * {{
-    color: {text_color} !important;   /* force inner text (incl. filename) to be visible */
+    color: {('white' if theme=='Dark Mode' else '#1e293b')} !important;
 }}
-/* streamlit renders "Browse files" as a label>div[role=button] */
+/* Always blue Browse files button */
 [data-testid="stFileUploader"] label div[role='button'] {{
-    background: {secondary_color};
+    background: linear-gradient(90deg, #0077b6, #00b4d8);
     color: white !important;
     border-radius: 8px;
-    padding: 0.40rem 0.85rem;
+    padding: 0.45rem 0.9rem;
     font-weight: 700;
-    filter: none !important;
+    box-shadow: 0 0 6px rgba(0, 183, 255, 0.6);
+    transition: all 0.2s ease-in-out;
 }}
-/* DataFrame wrap */
+[data-testid="stFileUploader"] label div[role='button']:hover {{
+    background: linear-gradient(90deg, #00b4d8, #0077b6);
+    transform: scale(1.03);
+    box-shadow: 0 0 12px rgba(0, 183, 255, 0.8);
+}}
+[data-testid="stFileUploaderFileName"] {{
+    color: {('white' if theme=='Dark Mode' else '#0f172a')} !important;
+    font-weight: 600;
+}}
+/* DataFrame */
 .stDataFrame {{
     background: {('rgba(255,255,255,0.05)' if theme=='Dark Mode' else 'rgba(0,0,0,0.03)')};
     border-radius: 12px;
@@ -135,22 +141,23 @@ button:hover {{
     border-radius: 10px;
     color: {text_color};
 }}
-/* Download button */
+/* Download button gradient */
 .stDownloadButton>button {{
-    background: linear-gradient(90deg, {accent_color}, {secondary_color});
+    background: linear-gradient(90deg, {secondary_color}, {accent_color});
     color: white !important;
     border-radius: 8px;
     font-weight: 700;
+    box-shadow: 0 0 6px rgba(0, 183, 255, 0.6);
 }}
 .stDownloadButton>button:hover {{
-    background: linear-gradient(90deg, {secondary_color}, {accent_color});
+    background: linear-gradient(90deg, {accent_color}, {secondary_color});
+    transform: scale(1.03);
+    box-shadow: 0 0 12px rgba(0, 183, 255, 0.8);
 }}
-/* Plot containers */
 .plotly, .js-plotly-plot, .plot-container {{
     background: transparent !important;
     border-radius: 12px;
 }}
-/* Slider: label & handle visibility */
 .stSlider label {{
     color: {accent_color if theme=="Light Mode" else "#A7C7E7"} !important;
     font-weight: 700;
@@ -158,7 +165,6 @@ button:hover {{
 .stSlider div[role='slider'] {{
     background: {accent_color} !important;
 }}
-/* Subtle divider */
 hr {{
     border: none;
     height: 1px;
@@ -191,7 +197,6 @@ uploaded = st.file_uploader("", type=["csv", "mbox", "eml", "msg", "json"])
 
 if uploaded is not None:
     file_ext = os.path.splitext(uploaded.name)[1].lower()
-
     try:
         with st.spinner(f"Parsing {file_ext.upper()} file..."):
             df = parse_file(uploaded, file_ext)
@@ -202,12 +207,8 @@ if uploaded is not None:
         st.error(f"❌ Could not parse file: {e}")
         st.stop()
 
-    # Clean dataframe
     df = load_and_clean(df, text_col="message")
 
-    # ------------------------------------------------
-    # NLP & Threat Scoring
-    # ------------------------------------------------
     if "label" in df.columns:
         st.subheader("Model Training & Threat Scoring")
 
@@ -217,10 +218,8 @@ if uploaded is not None:
         model = LogisticRegression(max_iter=1000)
         model.fit(X, y)
 
-        # NLP probabilities
         nlp_prob = model.predict_proba(X)[:, 1] if len(set(y)) == 2 else model.predict_proba(X).max(axis=1)
 
-        # Metadata + threat score
         df_feat = extract_metadata_features(df, sender_col="sender",
                                             ts_col="timestamp", ip_col="ip",
                                             msg_col="message")
@@ -237,18 +236,10 @@ if uploaded is not None:
         out["threat_score"] = threat
         out["risk"] = risk
 
-        # ------------------------------------------------
-        # Charts (auto-themed)
-        # ------------------------------------------------
         st.subheader("📊 Threat Overview")
-        fig = px.histogram(
-            out,
-            x="risk",
-            title="Risk Distribution",
-            color="risk",
-            color_discrete_sequence=px.colors.qualitative.Safe,
-            template=pio.templates.default
-        )
+        fig = px.histogram(out, x="risk", title="Risk Distribution",
+                           color="risk", color_discrete_sequence=px.colors.qualitative.Safe,
+                           template=pio.templates.default)
         fig.update_layout(paper_bgcolor=chart_paper, plot_bgcolor=chart_plot)
         st.plotly_chart(fig, use_container_width=True)
 
@@ -257,20 +248,17 @@ if uploaded is not None:
             try:
                 out_sorted = out.copy()
                 out_sorted["timestamp"] = pd.to_datetime(out_sorted["timestamp"], errors="coerce")
-                fig2 = px.scatter(
-                    out_sorted.sort_values("timestamp"),
-                    x="timestamp", y="threat_score",
-                    color="risk",
-                    hover_data=["sender", "nlp_prob", "metadata_score"],
-                    template=pio.templates.default
-                )
+                fig2 = px.scatter(out_sorted.sort_values("timestamp"),
+                                  x="timestamp", y="threat_score",
+                                  color="risk",
+                                  hover_data=["sender", "nlp_prob", "metadata_score"],
+                                  template=pio.templates.default)
                 fig2.update_traces(mode="lines+markers")
                 fig2.update_layout(paper_bgcolor=chart_paper, plot_bgcolor=chart_plot)
                 st.plotly_chart(fig2, use_container_width=True)
             except Exception as e:
                 st.warning(f"⚠️ Could not render timeline: {e}")
 
-        # High-risk table + export
         st.subheader("🚨 Flagged Messages (High Risk)")
         st.dataframe(out[out["risk"] == "High"].head(50))
 
